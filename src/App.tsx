@@ -87,7 +87,10 @@ interface Question {
   text: string;
   options?: { id: string; text: string }[];
   correctAnswer?: string;
-  feedback?: string;
+  feedback: {
+    correct: string;
+    incorrect: string;
+  };
   type: 'choice' | 'scale' | 'open';
 }
 
@@ -139,7 +142,10 @@ const QUESTIONS: Question[] = [
       { id: 'c', text: "Solo evaluar post-accidente" }
     ],
     correctAnswer: 'b',
-    feedback: "Correcto: Identificar y comunicar es la base de la prevención proactiva."
+    feedback: {
+      correct: "¡Excelente! La base de la ética en ingeniería es la veracidad. Identificar el riesgo no sirve de nada sin una comunicación transparente a los involucrados.",
+      incorrect: "Cuidado. Ignorar riesgos o actuar solo post-accidente es una falta grave de responsabilidad proactiva. La ética en prevención es, por definición, anticipatoria."
+    }
   },
   {
     id: 2,
@@ -151,7 +157,10 @@ const QUESTIONS: Question[] = [
       { id: 'c', text: "Responsabilidad solo legal" }
     ],
     correctAnswer: 'b',
-    feedback: "Correcto: La ética pone la dignidad humana por sobre el interés económico."
+    feedback: {
+      correct: "Exacto. El fin último de la ingeniería no es el objeto, sino el sujeto (la persona) y su bienestar en la sociedad.",
+      incorrect: "Recuerda que la eficiencia económica y la ley son marcos operativos, pero la Dignidad Humana es el principio supraordenador de tu profesión."
+    }
   },
   {
     id: 3,
@@ -163,7 +172,10 @@ const QUESTIONS: Question[] = [
       { id: 'c', text: "Decidir unilateralmente" }
     ],
     correctAnswer: 'b',
-    feedback: "Correcto: La transparencia exige honestidad sobre los riesgos potenciales."
+    feedback: {
+      correct: "Muy bien. La transparencia ética significa dar información oportuna para evitar el daño, no solo explicarlo cuando ya ocurrió.",
+      incorrect: "Limitarse a reportar accidentes es reactivo. La transparencia busca empoderar a otros mediante el conocimiento del riesgo antes de la exposición."
+    }
   },
   {
     id: 4,
@@ -175,7 +187,10 @@ const QUESTIONS: Question[] = [
       { id: 'c', text: "Esperar confirmación externa" }
     ],
     correctAnswer: 'b',
-    feedback: "Correcto: La integridad profesional obliga a no ser cómplice de riesgos evitables."
+    feedback: {
+      correct: "Correcto. Ante un conflicto de lealtad, la lealtad hacia la vida y la integridad física siempre prevalece sobre la jerarquía administrativa.",
+      incorrect: "El silencio te hace corresponsable. La \"lealtad\" mal entendida en ética profesional puede derivar en negligencia criminal."
+    }
   },
   {
     id: 5,
@@ -187,7 +202,10 @@ const QUESTIONS: Question[] = [
       { id: 'c', text: "Identificar" }
     ],
     correctAnswer: 'c',
-    feedback: "Correcto: No se puede gestionar lo que no se ha identificado primero."
+    feedback: {
+      correct: "Lógica pura. No puedes gestionar lo que no has reconocido. La identificación es el primer acto de conciencia profesional.",
+      incorrect: "Analizar o tratar un riesgo sin haberlo identificado primero es un error metodológico que deja brechas de seguridad críticas."
+    }
   },
   {
     id: 6,
@@ -198,7 +216,10 @@ const QUESTIONS: Question[] = [
       { id: 'b', text: "Seguridad" }
     ],
     correctAnswer: 'b',
-    feedback: "Correcto: En prevención, la seguridad es el valor intransable."
+    feedback: {
+      correct: "La seguridad es innegociable. Un ingeniero ético entiende que la vida es un valor absoluto, mientras que los costos son variables relativas.",
+      incorrect: "Priorizar costos sobre seguridad es la causa principal de los grandes desastres industriales. Revisa tu jerarquía de valores."
+    }
   },
   {
     id: 7,
@@ -209,7 +230,10 @@ const QUESTIONS: Question[] = [
       { id: 'b', text: "Aprobar con advertencia verbal" }
     ],
     correctAnswer: 'a',
-    feedback: "Correcto: La ética exige soluciones técnicas seguras, no parches verbales."
+    feedback: {
+      correct: "¡Brillante! La ética no es solo decir \"no\", es ofrecer soluciones técnicas que no comprometan la seguridad de los trabajadores.",
+      incorrect: "Una advertencia verbal no tiene validez legal ni técnica frente a un equipo defectuoso. Estás poniendo firmas sobre vidas."
+    }
   },
   {
     id: 8,
@@ -221,17 +245,28 @@ const QUESTIONS: Question[] = [
       { id: 'c', text: "Totalmente en desacuerdo" }
     ],
     correctAnswer: 'c',
-    feedback: "Correcto: Las crisis no suspenden la ética; al contrario, la ponen a prueba."
+    feedback: {
+      correct: "Correcto. Las crisis no suspenden la ética; por el contrario, es cuando más se pone a prueba la integridad del prevencionista.",
+      incorrect: "Si la seguridad es sacrificable en tiempos de crisis, entonces no es un principio, sino una opción de lujo. Debes replantear tu compromiso."
+    }
   },
   {
     id: 9,
     type: 'scale',
-    text: "Escala de 1 a 10: “La prevención ética salva vidas antes que leyes”."
+    text: "Escala de 1 a 10: “La prevención ética salva vidas antes que leyes”.",
+    feedback: {
+      correct: "¡Excelente criterio! Reconoces que la ética profesional es proactiva y va más allá del simple cumplimiento de la norma (que suele ser reactiva). Entiendes que el compromiso con la vida es un imperativo moral que no espera a que una ley lo exija para actuar.",
+      incorrect: "Tu valoración indica una dependencia alta del marco legal. Recuerda que, en ingeniería, la ley es el estándar mínimo, pero la ética es el estándar de excelencia. Si solo actuamos cuando la ley nos obliga, estamos dejando un vacío de seguridad peligroso. Un prevencionista ético debe actuar basándose en el valor de la vida, incluso donde la ley aún no llega o es ambigua."
+    }
   },
   {
     id: 10,
     type: 'open',
-    text: "¿Cuál es su rol ético como prevencionista?"
+    text: "¿Cuál es su rol ético como prevencionista?",
+    feedback: {
+      correct: "Tu visión es la correcta: eres un custodio de la vida. Tu éxito no se mide en papeles, sino en personas que regresan sanas a su hogar.",
+      incorrect: "Tu rol no es administrativo. Si no mencionas la protección del ser humano como centro, estás viendo solo una parte del trabajo."
+    }
   }
 ];
 
@@ -707,18 +742,40 @@ export default function App() {
                   )}
                 </div>
 
-                {showFeedback && QUESTIONS[currentQuestion].type === 'choice' && (
+                {showFeedback && (
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }} 
                     animate={{ opacity: 1, height: 'auto' }}
                     className={`mt-6 p-4 rounded-xl flex gap-3 ${
-                      answers[QUESTIONS[currentQuestion].id] === QUESTIONS[currentQuestion].correctAnswer 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                      (() => {
+                        const q = QUESTIONS[currentQuestion];
+                        const ans = answers[q.id];
+                        let isCorrect = false;
+                        if (q.type === 'choice') isCorrect = ans === q.correctAnswer;
+                        if (q.type === 'scale') isCorrect = parseInt(ans) >= 8;
+                        if (q.type === 'open') {
+                          const keywords = ["vida", "protección", "humana", "seguridad", "ética", "personas", "responsabilidad"];
+                          isCorrect = keywords.some(word => ans?.toLowerCase().includes(word));
+                        }
+                        return isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                      })()
                     }`}
                   >
                     <Info size={20} className="shrink-0" />
-                    <p className="text-sm">{QUESTIONS[currentQuestion].feedback}</p>
+                    <p className="text-sm">
+                      {(() => {
+                        const q = QUESTIONS[currentQuestion];
+                        const ans = answers[q.id];
+                        let isCorrect = false;
+                        if (q.type === 'choice') isCorrect = ans === q.correctAnswer;
+                        if (q.type === 'scale') isCorrect = parseInt(ans) >= 8;
+                        if (q.type === 'open') {
+                          const keywords = ["vida", "protección", "humana", "seguridad", "ética", "personas", "responsabilidad"];
+                          isCorrect = keywords.some(word => ans?.toLowerCase().includes(word));
+                        }
+                        return isCorrect ? q.feedback.correct : q.feedback.incorrect;
+                      })()}
+                    </p>
                   </motion.div>
                 )}
 
