@@ -17,7 +17,11 @@ import {
   Download,
   GraduationCap,
   HardHat,
-  Info
+  Info,
+  Library,
+  Monitor,
+  Layers,
+  FileText
 } from 'lucide-react';
 import { generateEthicsDoc } from './utils/docGenerator';
 
@@ -39,11 +43,38 @@ interface Question {
 // --- Datos del Programa ---
 const SYLLABUS = {
   units: [
-    { title: "Unidad 1: Fundamentos de la ética", content: "Fundamentos de la ética profesional del/la ingeniero/a; empresa y éxito profesional; stakeholders y visión integral." },
-    { title: "Unidad 2: Ética en el ejercicio", content: "Naturaleza de la ética profesional; modelo ético centrado en la persona; evaluación ética." },
-    { title: "Unidad 3: Dilemas éticos", content: "Identificación y resolución de dilemas; competencias éticas; evaluación de consecuencias." },
-    { title: "Unidad 4: Comportamiento ético", content: "Relación con colegas, clientes y sociedad; implementación de decisiones en proyectos." }
-  ]
+    { title: "Unidad 1: Fundamentos de la ética", content: "1.1. Fundamentos de la ética profesional del/la ingeniero/a; 1.2. Empresa y éxito profesional; 1.3. Actividad económica y los stakeholders, visión integral de empresa y de la profesión." },
+    { title: "Unidad 2: La ética profesional para el ejercicio de la profesión de ingeniero/a", content: "2.1. Naturaleza de la ética profesional; 2.2. Modelo ético centrado en la persona humana; 2.3. Evaluación ética y profesional." },
+    { title: "Unidad 3: Dilemas éticos en la ingeniería", content: "3.1. Identificación y resolución de dilemas éticos en los negocios; 3.2. Competencia éticas y profesionales; 3.3. Decisiones éticas, evaluación de alternativas y consecuencias." },
+    { title: "Unidad 4: Comportamiento y conducta ética", content: "4.1. Desarrollo de competencias éticas; 4.2. Relación con colegas, clientes y la sociedad; 4.3. Implementación de decisiones éticas en proyectos de ingeniería." }
+  ],
+  evaluation: [
+    { title: "Evaluación Diagnóstica", content: "Preguntas indagatorias. Retroalimentación." },
+    { title: "Evaluación Formativa", content: "Trabajos grupales. Retroalimentación." },
+    { title: "Evaluación Sumativa", content: "Prueba escrita mixta (20%); Prueba escrita mixta (20%); Análisis de casos (40%); Actividades virtuales en plataforma virtual (20%)." }
+  ],
+  bibliography: {
+    obligatory: [
+      "Melé, D. (2022). Ética Profesional. Ediciones UC.",
+      "Sonnenfeld, A. (2020). Liderazgo ético. Aula magna.",
+      "Valencia Gutiérrez, A. (2015). El principio de la ética. Ensayo de interpretación del pensamiento de Estanislao Zuleta (2da. Edición)."
+    ],
+    complementary: [
+      "Molina Velásquez, C. (2012). Ética profesional y organizacional. UCA editores.",
+      "Weiss, J. W. (n.d.). Ética en los negocios: un enfoque de administración de los Stakeholders y de casos (4ta. Edición). Internacional libros."
+    ]
+  },
+  resources: {
+    it: [
+      "Plataforma Moodle Institucional.",
+      "Biblioteca Digital UDA (https://bibliotecadigital.uda.cl)",
+      "Colección Digital UDA (https://colecciondigital.uda.cl)"
+    ],
+    others: [
+      "Herramientas de ofimática (Word, Excel, Power Point)",
+      "Herramientas digitales educativas"
+    ]
+  }
 };
 
 const QUESTIONS: Question[] = [
@@ -398,12 +429,85 @@ export default function App() {
                   </p>
                 </div>
                 <div className="p-4 sm:p-6 space-y-6">
+                  <div className="flex items-center gap-2 text-amber-600 font-bold border-b border-amber-100 pb-2">
+                    <Layers size={20} />
+                    <span>Unidades de Aprendizaje</span>
+                  </div>
                   {SYLLABUS.units.map((unit, i) => (
                     <div key={i} className="border-b border-slate-100 pb-4 last:border-0">
-                      <h4 className="font-bold text-amber-600 mb-2">{unit.title}</h4>
+                      <h4 className="font-bold text-slate-800 mb-2">{unit.title}</h4>
                       <p className="text-slate-600 text-sm">{unit.content}</p>
                     </div>
                   ))}
+
+                  <div className="flex items-center gap-2 text-amber-600 font-bold border-b border-amber-100 pb-2 pt-4">
+                    <ClipboardCheck size={20} />
+                    <span>Sistema de Evaluación</span>
+                  </div>
+                  {SYLLABUS.evaluation.map((evalItem, i) => (
+                    <div key={i} className="border-b border-slate-100 pb-4 last:border-0">
+                      <h4 className="font-bold text-slate-800 mb-2">{evalItem.title}</h4>
+                      <p className="text-slate-600 text-sm">{evalItem.content}</p>
+                    </div>
+                  ))}
+
+                  <div className="flex items-center gap-2 text-amber-600 font-bold border-b border-amber-100 pb-2 pt-4">
+                    <Library size={20} />
+                    <span>Bibliografía</span>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Obligatoria</h5>
+                      <ul className="space-y-2">
+                        {SYLLABUS.bibliography.obligatory.map((book, i) => (
+                          <li key={i} className="text-sm text-slate-600 flex gap-2">
+                            <span className="text-amber-500">•</span>
+                            {book}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Complementaria</h5>
+                      <ul className="space-y-2">
+                        {SYLLABUS.bibliography.complementary.map((book, i) => (
+                          <li key={i} className="text-sm text-slate-600 flex gap-2">
+                            <span className="text-amber-500">•</span>
+                            {book}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-amber-600 font-bold border-b border-amber-100 pb-2 pt-4">
+                    <Monitor size={20} />
+                    <span>Recursos de Aprendizaje</span>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Informáticos</h5>
+                      <ul className="space-y-2">
+                        {SYLLABUS.resources.it.map((res, i) => (
+                          <li key={i} className="text-sm text-slate-600 flex gap-2">
+                            <span className="text-amber-500">•</span>
+                            {res}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Otros Recursos</h5>
+                      <ul className="space-y-2">
+                        {SYLLABUS.resources.others.map((res, i) => (
+                          <li key={i} className="text-sm text-slate-600 flex gap-2">
+                            <span className="text-amber-500">•</span>
+                            {res}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
