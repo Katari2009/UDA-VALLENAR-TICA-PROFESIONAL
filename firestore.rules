@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: evaluaciones
+    // Fields:
+    //   - score: number (required)
+    //   - level: string (required)
+    //   - profileDescription: string
+    //   - studentName: string (required)
+    //   - studentEmail: string (required)
+    //   - answers: map
+    //   - timestamp: timestamp
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == "christiannunezvega@gmail.com" && request.auth.token.email_verified == true);
+    }
+
+    function isValidEvaluacion(data) {
+      return data.score is number &&
+             data.level is string &&
+             data.studentName is string && data.studentName.size() > 0 &&
+             data.studentEmail is string && data.studentEmail.size() > 0;
+    }
+
+    match /evaluaciones/{evalId} {
+      // Allow anyone to submit an evaluation for now (since no login is implemented)
+      // In a production app, we would require authentication.
+      allow create: if isValidEvaluacion(request.resource.data);
+      
+      // Only the admin can read all evaluations
+      allow read: if isAdmin();
+    }
+  }
+}

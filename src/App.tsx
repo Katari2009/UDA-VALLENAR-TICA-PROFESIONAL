@@ -25,6 +25,8 @@ import {
   LogOut
 } from 'lucide-react';
 import { generateEthicsDoc } from './utils/docGenerator';
+import { db } from './firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // --- Tipos ---
 interface Student {
@@ -242,7 +244,7 @@ export default function App() {
     }
   };
 
-  const calculateResults = () => {
+  const calculateResults = async () => {
     let score = 0;
     QUESTIONS.forEach(q => {
       const ans = answers[q.id];
@@ -259,13 +261,17 @@ export default function App() {
       ? "Usted demuestra una sólida base ética, priorizando la vida y la integridad por sobre presiones externas. Es un perfil idóneo para liderar la prevención de riesgos en entornos de alta complejidad."
       : "Usted posee conocimientos éticos fundamentales, pero debe fortalecer su capacidad de respuesta ante dilemas complejos donde la seguridad entra en conflicto con intereses económicos.";
 
-    const finalResults = { score, level, profileDescription };
-    setResults(finalResults);
+const finalResults = { score, level, profileDescription, studentName: student.name, studentEmail: student.email, answers: answers, timestamp: serverTimestamp() };    setResults(finalResults);
     setStep('results');
     
     // Bloquear intento
-    localStorage.setItem(`attempt_${student?.email}`, 'true');
-    
+try {
+      // Guardamos en la colección "evaluaciones"
+      await addDoc(collection(db, "evaluaciones"), finalResults);
+      console.log("Resultado guardado en la nube exitosamente");
+    } catch (e) {
+      console.error("Error al guardar en base de datos:", e);
+    }    
     // Simular envío de correo
     console.log("Enviando reporte a litasanchezromero@gmail.com...");
   };

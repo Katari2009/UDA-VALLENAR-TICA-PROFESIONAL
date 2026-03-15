@@ -1,0 +1,25 @@
+{
+  "entities": {
+    "Evaluacion": {
+      "title": "Evaluación",
+      "description": "Resultado de la evaluación ética de un estudiante",
+      "type": "object",
+      "properties": {
+        "score": { "type": "number", "description": "Puntaje obtenido" },
+        "level": { "type": "string", "description": "Nivel alcanzado" },
+        "profileDescription": { "type": "string", "description": "Descripción del perfil ético" },
+        "studentName": { "type": "string", "description": "Nombre del estudiante" },
+        "studentEmail": { "type": "string", "description": "Correo del estudiante" },
+        "answers": { "type": "object", "description": "Respuestas detalladas" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Fecha y hora del servidor" }
+      },
+      "required": ["score", "level", "studentName", "studentEmail"]
+    }
+  },
+  "firestore": {
+    "evaluaciones": {
+      "schema": "Evaluacion",
+      "description": "Colección de evaluaciones realizadas"
+    }
+  }
+}
