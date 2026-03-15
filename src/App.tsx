@@ -21,7 +21,8 @@ import {
   Library,
   Monitor,
   Layers,
-  FileText
+  FileText,
+  LogOut
 } from 'lucide-react';
 import { generateEthicsDoc } from './utils/docGenerator';
 
@@ -217,6 +218,16 @@ export default function App() {
     setStep('home');
   };
 
+  const handleLogout = () => {
+    setStudent(null);
+    localStorage.removeItem('uda_student');
+    setStep('register');
+    setAnswers({});
+    setResults(null);
+    setCurrentQuestion(0);
+    setError("");
+  };
+
   const handleAnswer = (value: any) => {
     setAnswers(prev => ({ ...prev, [QUESTIONS[currentQuestion].id]: value }));
     setShowFeedback(true);
@@ -278,12 +289,22 @@ export default function App() {
           {student && (
             <div className="flex items-center gap-4 text-sm">
               <span className="opacity-70 hidden md:inline">{student.email}</span>
-              <button 
-                onClick={() => setStep('home')}
-                className="hover:text-amber-500 transition-colors"
-              >
-                Inicio
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setStep('home')}
+                  className="hover:text-amber-500 transition-colors font-medium"
+                >
+                  Inicio
+                </button>
+                <div className="w-px h-4 bg-white/20" />
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 hover:text-red-400 transition-colors font-medium"
+                >
+                  <LogOut size={14} />
+                  <span>Salir</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -409,6 +430,16 @@ export default function App() {
                     )}
                   </AnimatePresence>
                 </div>
+              </div>
+
+              <div className="flex justify-center">
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-slate-500 font-bold hover:text-red-600 transition-colors"
+                >
+                  <LogOut size={18} />
+                  Cerrar Sesión / Salir
+                </button>
               </div>
             </motion.div>
           )}
@@ -671,12 +702,22 @@ export default function App() {
                 </button>
               </div>
 
-              <button 
-                onClick={() => setStep('home')}
-                className="text-slate-500 font-bold hover:text-slate-800 transition-colors"
-              >
-                Volver al Inicio
-              </button>
+               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button 
+                  onClick={() => setStep('home')}
+                  className="text-slate-500 font-bold hover:text-slate-800 transition-colors"
+                >
+                  Volver al Inicio
+                </button>
+                <div className="hidden sm:block w-px h-4 bg-slate-300" />
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-slate-500 font-bold hover:text-red-600 transition-colors"
+                >
+                  <LogOut size={16} />
+                  Cerrar Sesión
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
