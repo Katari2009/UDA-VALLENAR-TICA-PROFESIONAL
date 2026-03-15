@@ -45,7 +45,7 @@ export const generateEthicsDoc = async (studentData, results, questions, answers
         properties: {},
         children: [
           new Paragraph({
-            text: "EVALUACIÓN DIAGNÓSTICA: ÉTICA EN INGENIERÍA",
+            text: "EVALUACIÓN DIAGNÓSTICA: ÉTICA EN INGENIERÍA EN PREVENCIÓN DE RIESGOS",
             heading: HeadingLevel.HEADING_1,
             alignment: AlignmentType.CENTER,
           }),
