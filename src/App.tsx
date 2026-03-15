@@ -26,7 +26,55 @@ import {
 } from 'lucide-react';
 import { generateEthicsDoc } from './utils/docGenerator';
 import { db } from './firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocFromServer, doc } from 'firebase/firestore';
+
+// --- Error Handling Spec for Firestore Permissions ---
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+  }
+}
+
+const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: undefined, // auth not used for submission yet
+      email: undefined,
+      emailVerified: undefined,
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  return errInfo;
+};
+
+// Test connection
+const testConnection = async () => {
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.error("Please check your Firebase configuration. The client is offline.");
+    }
+  }
+};
+testConnection();
 
 // --- Tipos ---
 interface Student {
@@ -265,12 +313,13 @@ const finalResults = { score, level, profileDescription, studentName: student.na
     setStep('results');
     
     // Bloquear intento
-try {
+    try {
       // Guardamos en la colección "evaluaciones"
       await addDoc(collection(db, "evaluaciones"), finalResults);
       console.log("Resultado guardado en la nube exitosamente");
     } catch (e) {
-      console.error("Error al guardar en base de datos:", e);
+      handleFirestoreError(e, OperationType.CREATE, "evaluaciones");
+      alert("Error al guardar en la base de datos. Por favor, verifique la configuración de Firebase.");
     }    
     // Simular envío de correo
     console.log("Enviando reporte a litasanchezromero@gmail.com...");
