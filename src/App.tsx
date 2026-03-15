@@ -254,7 +254,7 @@ export default function App() {
       }
     });
 
-    const level = score >= 9 ? "Minero Ético Élite" : score >= 7 ? "Minero Ético Avanzado" : "Minero Ético en Progreso";
+    const level = score >= 8 ? "PREVENCIONISTA ÉTICO DE ÉLITE" : score >= 6 ? "Prevencionista Ético Avanzado" : "Prevencionista Ético en Progreso";
     const profileDescription = score >= 8 
       ? "Usted demuestra una sólida base ética, priorizando la vida y la integridad por sobre presiones externas. Es un perfil idóneo para liderar la prevención de riesgos en entornos de alta complejidad."
       : "Usted posee conocimientos éticos fundamentales, pero debe fortalecer su capacidad de respuesta ante dilemas complejos donde la seguridad entra en conflicto con intereses económicos.";
