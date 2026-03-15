@@ -581,6 +581,7 @@ export default function App() {
       <footer className="mt-12 p-8 text-center text-slate-400 text-xs border-t border-slate-200">
         <p>© 2026 Universidad de Atacama - Sede Vallenar</p>
         <p>Facultad Tecnológica | Ingeniería de Ejecución en Prevención de Riesgos</p>
+        <p className="mt-2 font-medium text-slate-500">Creado por: Adriana Sánchez R., Profesora de Ética, 2026.</p>
       </footer>
     </div>
   );
