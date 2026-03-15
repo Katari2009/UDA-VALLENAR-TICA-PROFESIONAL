@@ -1,0 +1,587 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  ShieldCheck, 
+  BookOpen, 
+  ClipboardCheck, 
+  User, 
+  Mail, 
+  ChevronRight, 
+  AlertCircle, 
+  CheckCircle2, 
+  Download,
+  GraduationCap,
+  HardHat,
+  Info
+} from 'lucide-react';
+import { generateEthicsDoc } from './utils/docGenerator';
+
+// --- Tipos ---
+interface Student {
+  name: string;
+  email: string;
+}
+
+interface Question {
+  id: number;
+  text: string;
+  options?: { id: string; text: string }[];
+  correctAnswer?: string;
+  feedback?: string;
+  type: 'choice' | 'scale' | 'open';
+}
+
+// --- Datos del Programa ---
+const SYLLABUS = {
+  units: [
+    { title: "Unidad 1: Fundamentos de la ética", content: "Fundamentos de la ética profesional del/la ingeniero/a; empresa y éxito profesional; stakeholders y visión integral." },
+    { title: "Unidad 2: Ética en el ejercicio", content: "Naturaleza de la ética profesional; modelo ético centrado en la persona; evaluación ética." },
+    { title: "Unidad 3: Dilemas éticos", content: "Identificación y resolución de dilemas; competencias éticas; evaluación de consecuencias." },
+    { title: "Unidad 4: Comportamiento ético", content: "Relación con colegas, clientes y sociedad; implementación de decisiones en proyectos." }
+  ]
+};
+
+const QUESTIONS: Question[] = [
+  {
+    id: 1,
+    type: 'choice',
+    text: "¿Qué paso ético del modelo de riesgos prioriza el programa?",
+    options: [
+      { id: 'a', text: "Ignorar riesgos bajos" },
+      { id: 'b', text: "Identificar y comunicar riesgos" },
+      { id: 'c', text: "Solo evaluar post-accidente" }
+    ],
+    correctAnswer: 'b',
+    feedback: "Correcto: Identificar y comunicar es la base de la prevención proactiva."
+  },
+  {
+    id: 2,
+    type: 'choice',
+    text: "Principio clave en prevención:",
+    options: [
+      { id: 'a', text: "Eficiencia económica primero" },
+      { id: 'b', text: "Respeto a dignidad y bien común" },
+      { id: 'c', text: "Responsabilidad solo legal" }
+    ],
+    correctAnswer: 'b',
+    feedback: "Correcto: La ética pone la dignidad humana por sobre el interés económico."
+  },
+  {
+    id: 3,
+    type: 'choice',
+    text: "En ética de riesgos, ¿qué implica transparencia?",
+    options: [
+      { id: 'a', text: "Reportar solo accidentes" },
+      { id: 'b', text: "Informar peligros preventivos" },
+      { id: 'c', text: "Decidir unilateralmente" }
+    ],
+    correctAnswer: 'b',
+    feedback: "Correcto: La transparencia exige honestidad sobre los riesgos potenciales."
+  },
+  {
+    id: 4,
+    type: 'choice',
+    text: "Caso: jefe exige omitir riesgo eléctrico. Usted elige:",
+    options: [
+      { id: 'a', text: "Callar por lealtad" },
+      { id: 'b', text: "Denunciar formalmente y documentar" },
+      { id: 'c', text: "Esperar confirmación externa" }
+    ],
+    correctAnswer: 'b',
+    feedback: "Correcto: La integridad profesional obliga a no ser cómplice de riesgos evitables."
+  },
+  {
+    id: 5,
+    type: 'choice',
+    text: "De los siguientes pasos éticos de acción, el primero es:",
+    options: [
+      { id: 'a', text: "Tratar riesgo" },
+      { id: 'b', text: "Analizar" },
+      { id: 'c', text: "Identificar" }
+    ],
+    correctAnswer: 'c',
+    feedback: "Correcto: No se puede gestionar lo que no se ha identificado primero."
+  },
+  {
+    id: 6,
+    type: 'choice',
+    text: "¿Cuál de estos dos aspectos priorizas en una situación de riesgo?",
+    options: [
+      { id: 'a', text: "Costos" },
+      { id: 'b', text: "Seguridad" }
+    ],
+    correctAnswer: 'b',
+    feedback: "Correcto: En prevención, la seguridad es el valor intransable."
+  },
+  {
+    id: 7,
+    type: 'choice',
+    text: "Caso: presión para certificar equipo defectuoso. ¿Cuál sería tu acción a seguir?",
+    options: [
+      { id: 'a', text: "Rechazar y proponer alternativas" },
+      { id: 'b', text: "Aprobar con advertencia verbal" }
+    ],
+    correctAnswer: 'a',
+    feedback: "Correcto: La ética exige soluciones técnicas seguras, no parches verbales."
+  },
+  {
+    id: 8,
+    type: 'choice',
+    text: "“Priorizar costos sobre seguridad es aceptable en crisis”:",
+    options: [
+      { id: 'a', text: "Totalmente de acuerdo" },
+      { id: 'b', text: "Neutral" },
+      { id: 'c', text: "Totalmente en desacuerdo" }
+    ],
+    correctAnswer: 'c',
+    feedback: "Correcto: Las crisis no suspenden la ética; al contrario, la ponen a prueba."
+  },
+  {
+    id: 9,
+    type: 'scale',
+    text: "Escala de 1 a 10: “La prevención ética salva vidas antes que leyes”."
+  },
+  {
+    id: 10,
+    type: 'open',
+    text: "¿Cuál es su rol ético como prevencionista?"
+  }
+];
+
+export default function App() {
+  const [step, setStep] = useState<'register' | 'home' | 'syllabus' | 'eval' | 'results'>('register');
+  const [student, setStudent] = useState<Student | null>(null);
+  const [answers, setAnswers] = useState<Record<number, any>>({});
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [results, setResults] = useState<any>(null);
+  const [error, setError] = useState("");
+  const [attemptBlocked, setAttemptBlocked] = useState(false);
+
+  // Cargar estudiante si existe en localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('uda_student');
+    if (saved) {
+      setStudent(JSON.parse(saved));
+      setStep('home');
+    }
+  }, []);
+
+  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+
+    if (!name || !email) return setError("Todos los campos son obligatorios");
+    
+    const newStudent = { name, email };
+    setStudent(newStudent);
+    localStorage.setItem('uda_student', JSON.stringify(newStudent));
+    setStep('home');
+  };
+
+  const handleAnswer = (value: any) => {
+    setAnswers(prev => ({ ...prev, [QUESTIONS[currentQuestion].id]: value }));
+    setShowFeedback(true);
+  };
+
+  const nextQuestion = () => {
+    setShowFeedback(false);
+    if (currentQuestion < QUESTIONS.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
+    } else {
+      calculateResults();
+    }
+  };
+
+  const calculateResults = () => {
+    let score = 0;
+    QUESTIONS.forEach(q => {
+      const ans = answers[q.id];
+      if (q.type === 'choice' && ans === q.correctAnswer) score++;
+      if (q.type === 'scale' && parseInt(ans) >= 8) score++;
+      if (q.type === 'open') {
+        const keywords = ["vida", "protección", "humana", "seguridad", "ética", "personas", "responsabilidad"];
+        if (keywords.some(word => ans?.toLowerCase().includes(word))) score++;
+      }
+    });
+
+    const level = score >= 9 ? "Minero Ético Élite" : score >= 7 ? "Minero Ético Avanzado" : "Minero Ético en Progreso";
+    const profileDescription = score >= 8 
+      ? "Usted demuestra una sólida base ética, priorizando la vida y la integridad por sobre presiones externas. Es un perfil idóneo para liderar la prevención de riesgos en entornos de alta complejidad."
+      : "Usted posee conocimientos éticos fundamentales, pero debe fortalecer su capacidad de respuesta ante dilemas complejos donde la seguridad entra en conflicto con intereses económicos.";
+
+    const finalResults = { score, level, profileDescription };
+    setResults(finalResults);
+    setStep('results');
+    
+    // Bloquear intento
+    localStorage.setItem(`attempt_${student?.email}`, 'true');
+    
+    // Simular envío de correo
+    console.log("Enviando reporte a litasanchezromero@gmail.com...");
+  };
+
+  const handleDownloadDoc = () => {
+    if (student && results) {
+      generateEthicsDoc(student, results, QUESTIONS, answers);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      {/* Navbar */}
+      <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-lg">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <HardHat className="text-amber-500" />
+            <span className="font-bold tracking-tight hidden sm:inline">UDA VALLENAR | ÉTICA PROFESIONAL</span>
+            <span className="font-bold sm:hidden">UDA ÉTICA</span>
+          </div>
+          {student && (
+            <div className="flex items-center gap-4 text-sm">
+              <span className="opacity-70 hidden md:inline">{student.email}</span>
+              <button 
+                onClick={() => setStep('home')}
+                className="hover:text-amber-500 transition-colors"
+              >
+                Inicio
+              </button>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      <main className="max-w-4xl mx-auto p-4 sm:p-6">
+        <AnimatePresence mode="wait">
+          {/* REGISTRO */}
+          {step === 'register' && (
+            <motion.div 
+              key="register"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-200 max-w-md mx-auto mt-8 sm:mt-12"
+            >
+              <div className="text-center mb-8">
+                <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="text-amber-600 w-8 h-8" />
+                </div>
+                <h2 className="text-2xl font-bold">Registro de Estudiante</h2>
+                <p className="text-slate-500 text-sm">Ingeniería en Prevención de Riesgos</p>
+              </div>
+
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Nombre Completo</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                    <input 
+                      name="name" 
+                      type="text" 
+                      placeholder="Ej: Juan Pérez"
+                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Correo Institucional</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                    <input 
+                      name="email" 
+                      type="email" 
+                      placeholder="ejemplo@uda.cl"
+                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                {error && <p className="text-red-500 text-sm flex items-center gap-1"><AlertCircle size={14}/> {error}</p>}
+                <button className="w-full bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition-all shadow-md">
+                  Ingresar al Curso
+                </button>
+              </form>
+            </motion.div>
+          )}
+
+          {/* HOME */}
+          {step === 'home' && (
+            <motion.div 
+              key="home"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-8"
+            >
+              <section className="relative h-48 sm:h-64 rounded-3xl overflow-hidden shadow-2xl">
+                <img 
+                  src="https://picsum.photos/seed/mining/1200/600" 
+                  className="w-full h-full object-cover brightness-50"
+                  alt="Minería"
+                />
+                <div className="absolute inset-0 flex flex-col justify-center p-6 sm:p-8 text-white">
+                  <h1 className="text-2xl sm:text-4xl font-black mb-2">ÉTICA PROFESIONAL</h1>
+                  <p className="text-amber-400 font-medium tracking-widest uppercase text-[10px] sm:text-sm">Prevención de Riesgos | UDA Vallenar</p>
+                </div>
+              </section>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div 
+                  onClick={() => setStep('syllabus')}
+                  className="bg-white p-6 rounded-2xl shadow-md border-l-4 border-amber-500 cursor-pointer hover:shadow-lg transition-all"
+                >
+                  <BookOpen className="text-amber-600 mb-4" size={32} />
+                  <h3 className="text-xl font-bold mb-2">Programa del Curso</h3>
+                  <p className="text-slate-600 text-sm">Explora las unidades, competencias y resultados de aprendizaje de la asignatura.</p>
+                </div>
+                <div 
+                  onClick={() => {
+                    if (!student) return setError("Error: Datos de estudiante no encontrados.");
+                    const isBlocked = student.email && localStorage.getItem(`attempt_${student.email}`);
+                    if (isBlocked) {
+                      setAttemptBlocked(true);
+                      setTimeout(() => setAttemptBlocked(false), 3000);
+                    } else {
+                      setStep('eval');
+                    }
+                  }}
+                  className={`bg-white p-6 rounded-2xl shadow-md border-l-4 cursor-pointer hover:shadow-lg transition-all relative overflow-hidden ${
+                    student?.email && localStorage.getItem(`attempt_${student.email}`) 
+                    ? 'border-slate-300 opacity-75' 
+                    : 'border-slate-900'
+                  }`}
+                >
+                  <ClipboardCheck className={`${student?.email && localStorage.getItem(`attempt_${student.email}`) ? 'text-slate-400' : 'text-slate-900'} mb-4`} size={32} />
+                  <h3 className="text-xl font-bold mb-2">Evaluación Diagnóstica</h3>
+                  <p className="text-slate-600 text-sm">Pon a prueba tus fundamentos éticos. (Intento único).</p>
+                  
+                  <AnimatePresence>
+                    {attemptBlocked && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-slate-900/90 flex items-center justify-center p-4 text-center"
+                      >
+                        <p className="text-white text-sm font-bold flex items-center gap-2">
+                          <AlertCircle size={16} className="text-amber-500" />
+                          Ya has realizado tu intento único.
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* SYLLABUS */}
+          {step === 'syllabus' && (
+            <motion.div key="syllabus" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+              <div className="flex items-center gap-4 mb-8">
+                <button onClick={() => setStep('home')} className="p-2 hover:bg-slate-200 rounded-full"><ChevronRight className="rotate-180"/></button>
+                <h2 className="text-3xl font-bold">Programa de Asignatura</h2>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-4 sm:p-6 bg-slate-900 text-white">
+                  <h3 className="text-base sm:text-lg font-bold">Descripción de la Asignatura</h3>
+                  <p className="text-slate-300 text-xs sm:text-sm mt-2">
+                    Proporciona principios y valores éticos para guiar el comportamiento profesional; desarrolla reflexión crítica sobre acciones considerando implicancias morales y sociales.
+                  </p>
+                </div>
+                <div className="p-4 sm:p-6 space-y-6">
+                  {SYLLABUS.units.map((unit, i) => (
+                    <div key={i} className="border-b border-slate-100 pb-4 last:border-0">
+                      <h4 className="font-bold text-amber-600 mb-2">{unit.title}</h4>
+                      <p className="text-slate-600 text-sm">{unit.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                  <h4 className="font-bold flex items-center gap-2 mb-2"><ShieldCheck size={18}/> Competencias</h4>
+                  <ul className="text-xs space-y-2 text-slate-700">
+                    <li>• Aplica principios éticos en toma de decisiones.</li>
+                    <li>• Garantiza justicia y bien común.</li>
+                    <li>• Análisis crítico de información técnica.</li>
+                  </ul>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <h4 className="font-bold flex items-center gap-2 mb-2"><GraduationCap size={18}/> Aprendizaje</h4>
+                  <ul className="text-xs space-y-2 text-slate-700">
+                    <li>• Aplica marcos éticos en resolución de casos.</li>
+                    <li>• Explica principios en industria minera.</li>
+                    <li>• Considera impacto social y ambiental.</li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* EVALUACIÓN */}
+          {step === 'eval' && (
+            <motion.div key="eval" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="flex justify-between items-center mb-4 gap-4">
+                <span className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-widest">Pregunta {currentQuestion + 1} de {QUESTIONS.length}</span>
+                <div className="w-24 sm:w-32 h-2 bg-slate-200 rounded-full overflow-hidden shrink-0">
+                  <div 
+                    className="h-full bg-amber-500 transition-all duration-500" 
+                    style={{ width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-white p-5 sm:p-8 rounded-3xl shadow-xl border border-slate-200">
+                <h3 className="text-lg sm:text-xl font-bold mb-6 sm:mb-8">{QUESTIONS[currentQuestion].text}</h3>
+
+                <div className="space-y-3">
+                  {QUESTIONS[currentQuestion].type === 'choice' && QUESTIONS[currentQuestion].options?.map((opt) => (
+                    <button
+                      key={opt.id}
+                      disabled={showFeedback}
+                      onClick={() => handleAnswer(opt.id)}
+                      className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all flex justify-between items-center gap-3 ${
+                        answers[QUESTIONS[currentQuestion].id] === opt.id
+                          ? opt.id === QUESTIONS[currentQuestion].correctAnswer 
+                            ? 'border-green-500 bg-green-50' 
+                            : 'border-red-500 bg-red-50'
+                          : 'border-slate-100 hover:border-amber-200 hover:bg-amber-50'
+                      }`}
+                    >
+                      <span className="text-sm sm:text-base">{opt.text}</span>
+                      {showFeedback && opt.id === QUESTIONS[currentQuestion].correctAnswer && <CheckCircle2 className="text-green-500" />}
+                    </button>
+                  ))}
+
+                  {QUESTIONS[currentQuestion].type === 'scale' && (
+                    <div className="space-y-4">
+                      <input 
+                        type="range" min="1" max="10" 
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                        onChange={(e) => setAnswers(prev => ({ ...prev, [QUESTIONS[currentQuestion].id]: e.target.value }))}
+                      />
+                      <div className="flex justify-between text-xs font-bold text-slate-400">
+                        <span>1 - Nada de acuerdo</span>
+                        <span className="text-amber-600 text-lg">{answers[QUESTIONS[currentQuestion].id] || 5}</span>
+                        <span>10 - Totalmente de acuerdo</span>
+                      </div>
+                      <button 
+                        onClick={() => handleAnswer(answers[QUESTIONS[currentQuestion].id] || 5)}
+                        className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold"
+                      >
+                        Confirmar Valor
+                      </button>
+                    </div>
+                  )}
+
+                  {QUESTIONS[currentQuestion].type === 'open' && (
+                    <div className="space-y-4">
+                      <textarea 
+                        className="w-full p-4 border border-slate-200 rounded-xl h-32 outline-none focus:ring-2 focus:ring-amber-500"
+                        placeholder="Escriba su reflexión aquí..."
+                        onChange={(e) => setAnswers(prev => ({ ...prev, [QUESTIONS[currentQuestion].id]: e.target.value }))}
+                      />
+                      <button 
+                        onClick={() => handleAnswer(answers[QUESTIONS[currentQuestion].id])}
+                        className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold"
+                      >
+                        Finalizar Evaluación
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {showFeedback && QUESTIONS[currentQuestion].type === 'choice' && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} 
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className={`mt-6 p-4 rounded-xl flex gap-3 ${
+                      answers[QUESTIONS[currentQuestion].id] === QUESTIONS[currentQuestion].correctAnswer 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    <Info size={20} className="shrink-0" />
+                    <p className="text-sm">{QUESTIONS[currentQuestion].feedback}</p>
+                  </motion.div>
+                )}
+
+                {showFeedback && (
+                  <button 
+                    onClick={nextQuestion}
+                    className="mt-8 w-full bg-amber-500 text-white py-4 rounded-xl font-bold hover:bg-amber-600 transition-all flex items-center justify-center gap-2"
+                  >
+                    {currentQuestion < QUESTIONS.length - 1 ? "Siguiente Pregunta" : "Ver Resultados"}
+                    <ChevronRight />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* RESULTADOS */}
+          {step === 'results' && results && (
+            <motion.div key="results" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 sm:space-y-8 text-center">
+              <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl border border-slate-200">
+                <div className="mb-6">
+                  <div className="inline-block p-3 sm:p-4 bg-amber-100 rounded-full mb-4">
+                    <CheckCircle2 className="text-amber-600 w-10 h-10 sm:w-12 sm:h-12" />
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black">¡Evaluación Completada!</h2>
+                  <p className="text-slate-500 text-sm">Resultados enviados a litasanchezromero@gmail.com</p>
+                </div>
+
+                <div className="flex justify-center gap-4 sm:gap-8 mb-8">
+                  <div className="text-center">
+                    <span className="block text-3xl sm:text-4xl font-black text-slate-900">{results.score}/10</span>
+                    <span className="text-[10px] sm:text-xs uppercase font-bold text-slate-400">Puntaje</span>
+                  </div>
+                  <div className="w-px bg-slate-100" />
+                  <div className="text-center">
+                    <span className="block text-lg sm:text-xl font-black text-amber-600 mt-1 sm:mt-2">{results.level}</span>
+                    <span className="text-[10px] sm:text-xs uppercase font-bold text-slate-400">Nivel de Logro</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-6 rounded-2xl text-left mb-8">
+                  <h4 className="font-bold mb-2 flex items-center gap-2"><ShieldCheck size={18}/> Perfil Ético Observado</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed">{results.profileDescription}</p>
+                </div>
+
+                <button 
+                  onClick={handleDownloadDoc}
+                  className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Download size={20} />
+                  Descargar Reporte .DOCX
+                </button>
+              </div>
+
+              <button 
+                onClick={() => setStep('home')}
+                className="text-slate-500 font-bold hover:text-slate-800 transition-colors"
+              >
+                Volver al Inicio
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      <footer className="mt-12 p-8 text-center text-slate-400 text-xs border-t border-slate-200">
+        <p>© 2026 Universidad de Atacama - Sede Vallenar</p>
+        <p>Facultad Tecnológica | Ingeniería de Ejecución en Prevención de Riesgos</p>
+      </footer>
+    </div>
+  );
+}
