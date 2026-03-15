@@ -318,8 +318,8 @@ const finalResults = { score, level, profileDescription, studentName: student.na
       await addDoc(collection(db, "evaluaciones"), finalResults);
       console.log("Resultado guardado en la nube exitosamente");
     } catch (e) {
-      handleFirestoreError(e, OperationType.CREATE, "evaluaciones");
-      alert("Error al guardar en la base de datos. Por favor, verifique la configuración de Firebase.");
+      const errInfo = handleFirestoreError(e, OperationType.CREATE, "evaluaciones");
+      alert(`Error al guardar en la base de datos: ${errInfo.error}\n\nPor favor, verifique que la base de datos Firestore esté creada en modo 'Producción' o 'Prueba' y que las reglas permitan la escritura.`);
     }    
     // Simular envío de correo
     console.log("Enviando reporte a litasanchezromero@gmail.com...");
